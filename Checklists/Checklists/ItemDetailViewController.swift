@@ -1,11 +1,15 @@
 import UIKit
 
 protocol AddItemViewControllerDelegate: class{
-    func addItemViewControllerDidCancel(_ controller: AddItemViewController)
-    func addItemViewController(_ controller: AddItemViewController,didFinishAdding item: Checklistitems)
-    func addItemViewController(_ controller: AddItemViewController,didFinishEditing item: Checklistitems)
+    func addItemViewControllerDidCancel(_ controller: ItemDetailViewController)
+    func addItemViewController(_ controller: ItemDetailViewController,didFinishAdding item: Checklistitems){
+        saveChecklistItems()
+    }
+    func addItemViewController(_ controller: ItemDetailViewController,didFinishEditing item: Checklistitems){
+            saveChecklistItems()
+    }
 }
-class AddItemViewController: UITableViewController, UITextFieldDelegate {
+class ItemDetailViewController: UITableViewController, UITextFieldDelegate {
     @IBOutlet weak var textField: UITextField!
     weak var delegate: AddItemViewControllerDelegate?
     @IBOutlet weak var doneBarButton: UIBarButtonItem!

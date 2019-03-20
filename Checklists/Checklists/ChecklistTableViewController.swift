@@ -26,6 +26,9 @@ class ChecklistTableViewController: UITableViewController ,AddItemViewController
                 items[index].text = row4text
             }
         }
+        loadchecklistItems()
+        print("Documents folder: \(documentDirectory())")
+        print("Data file path: \(dataFilePath())")
       }
 
 
@@ -94,11 +97,11 @@ class ChecklistTableViewController: UITableViewController ,AddItemViewController
         tableView.deleteRows(at: indexPaths, with: .automatic)
     }
     
-    func addItemViewControllerDidCancel(_ controller: AddItemViewController) {
+    func addItemViewControllerDidCancel(_ controller: ItemDetailViewController) {
         navigationController?.popViewController(animated: true)
     }
     
-    func addItemViewController(_ controller: AddItemViewController, didFinishAdding item: Checklistitems) {
+    func addItemViewController(_ controller: ItemDetailViewController, didFinishAdding item: Checklistitems) {
         let newRowIndex = items.count
         items.append(item)
         
@@ -108,7 +111,7 @@ class ChecklistTableViewController: UITableViewController ,AddItemViewController
         navigationController?.popViewController(animated: true)
     }
  
-    func addItemViewController(_ controller: AddItemViewController, didFinishEditing item: Checklistitems) {
+    func addItemViewController(_ controller: ItemDetailViewController, didFinishEditing item: Checklistitems) {
         if let index = items.index(of: item){
             let indexPath = indexPath(row: index, section:0)
             
@@ -121,10 +124,10 @@ class ChecklistTableViewController: UITableViewController ,AddItemViewController
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "AddItem"{
-            let controller = segue.destination as! AddItemViewController
+            let controller = segue.destination as! ItemDetailViewController
             controller.delegate = self
         }else if segue.identifier == "EditItem" {
-            let  controller = segue.destination as! AddItemViewController
+            let  controller = segue.destination as! ItemDetailViewController
             controller.delegate = self
             
             if let indexPath = tableView.indexPath(for:sender as! UITableViewCell){
@@ -135,5 +138,34 @@ class ChecklistTableViewController: UITableViewController ,AddItemViewController
         
         
     }
-    
+    func documentDirectory() ->URL{
+        let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
+        
+        return paths[0]
+    }
+    func dataFilePath() ->URL {
+        return documentDirectory().appendingPathComponent("Checklists.plist")
+    }
+    func saveChecklistItems(){
+        let encoder = PropertyListEncoder()
+        
+        do{
+            let data = try encoder.encode(items)
+            
+            try data.write(to: dataFilePath(),options: Data.WritingOptions.atomic)
+        } catch{
+            print("Error encoding item array: \(error.localizedDescription)")
+        }
+    }
+    func loadchecklistItems(){
+        let path = dataFilePath()
+        if let data = try? Data(contentsOf: path){
+            let decoder = PropertyListDecoder()
+            do{
+                items = try decoder.decode([Checklistitem].self, from: data)
+            } catch{
+                print("Error decoding item array: \(error.localizedDescription)")
+            }
+        }
+    }
 }
